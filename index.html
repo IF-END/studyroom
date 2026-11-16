@@ -151,6 +151,69 @@
     </a>
   </main>
 
-  <p class="foot">게임 안의 🎮 버튼을 누르면 이 화면으로 돌아와요</p>
+  <p class="foot">게임 안의 🎮 버튼을 누르면 이 화면으로 돌아와요<br><button id="voiceBtn" type="button">🗣️ 목소리 고르기</button></p>
+
+  <div id="voiceModal" class="vm" hidden>
+    <div class="vbox">
+      <button class="vclose" type="button" aria-label="닫기">✕</button>
+      <h2>🗣️ 목소리 고르기</h2>
+      <p class="vsub">누르면 들어 볼 수 있어요. 고른 목소리는 모든 게임에서 써요.</p>
+      <div id="voiceList"></div>
+      <details class="vhelp">
+        <summary>더 자연스러운 목소리 받기 (아이패드)</summary>
+        <ol>
+          <li><b>설정</b> → <b>손쉬운 사용</b> → <b>읽기 및 말하기</b> → <b>음성</b> → <b>한국어</b></li>
+          <li><b>Yuna (프리미엄)</b>, <b>Yuna (향상됨)</b>, <b>Minsu</b>, <b>Sora</b> 같은 목소리 옆 ⬇️을 눌러 내려받기</li>
+          <li>이 화면을 다시 열면 목록에 나와요. '프리미엄'이 가장 사람 같아요.</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+  <style>
+    #voiceBtn { margin-top: 10px; font-family: inherit; font-size: 18px; color: #7c5a45; background: rgba(255,255,255,.75); border: 0; border-radius: 999px; padding: 8px 18px; box-shadow: 0 3px 0 rgba(0,0,0,.1); }
+    .vm { position: fixed; inset: 0; z-index: 50; background: rgba(40,25,10,.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .vm[hidden] { display: none; }
+    .vbox { position: relative; width: min(560px, 100%); max-height: 88vh; overflow: auto; background: #fffbeb; border-radius: 28px; padding: 22px 22px 18px; box-shadow: 0 16px 40px rgba(0,0,0,.25); }
+    .vbox h2 { margin: 0 0 4px; font-weight: normal; font-size: 30px; color: #db2777; text-align: center; }
+    .vsub { margin: 0 0 14px; text-align: center; color: #7c5a45; font-size: 17px; }
+    .vclose { position: absolute; right: 14px; top: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fee2e2; color: #b91c1c; font-size: 20px; }
+    #voiceList { display: grid; gap: 10px; }
+    .vopt { display: flex; align-items: center; gap: 12px; width: 100%; font-family: inherit; font-size: 20px; text-align: left; color: var(--ink); background: #fff; border: 3px solid transparent; border-radius: 18px; padding: 12px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.08); }
+    .vopt.on { border-color: #ec4899; background: #fdf2f8; }
+    .vopt .tag { margin-left: auto; font-size: 14px; padding: 3px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; white-space: nowrap; }
+    .vopt .tag.best { background: #dcfce7; color: #166534; }
+    .vhelp { margin-top: 14px; font-size: 16px; color: #7c5a45; line-height: 1.5; }
+    .vhelp summary { cursor: pointer; font-size: 17px; }
+    .vhelp ol { margin: 8px 0 0; padding-left: 22px; }
+  </style>
+  <script>
+  (function(){
+    var KEY = 'studyroomVoice';
+    function koVoices(){ try { return speechSynthesis.getVoices().filter(function(v){ return /^ko/i.test((v.lang||'').replace('_','-')); }); } catch(e){ return []; } }
+    function score(v){ var n=v.name||''; return (/premium|프리미엄/i.test(n)?50:0)+(/enhanced|향상/i.test(n)?40:0)+(/natural|neural|online/i.test(n)?30:0)+(/google/i.test(n)?10:0)+(/yuna|유나/i.test(n)?5:0)+(v.localService?1:0); }
+    function tag(v){ var s=score(v); return s>=30?['아주 자연스러움','best']:s>=10?['자연스러움','']:['기본','']; }
+    function getSaved(){ try { return localStorage.getItem(KEY); } catch(e){ return null; } }
+    function speak(v){ try { speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance('안녕! 나는 이 목소리로 이야기할게. 같이 놀자!'); u.lang='ko-KR'; if(v) u.voice=v; u.rate=.9; speechSynthesis.speak(u); } catch(e){} }
+    function render(){
+      var list=document.getElementById('voiceList'), vs=koVoices().sort(function(a,b){ return score(b)-score(a); }), saved=getSaved();
+      list.innerHTML='';
+      if(!vs.length){ list.innerHTML='<p class="vsub">이 기기에서 한국어 목소리를 찾지 못했어요. 아래 방법으로 내려받아 주세요.</p>'; return; }
+      var auto=document.createElement('button'); auto.type='button'; auto.className='vopt'+(saved?'':' on'); auto.innerHTML='✨ 자동 (가장 좋은 목소리) <span class="tag best">추천</span>';
+      auto.onclick=function(){ try{localStorage.removeItem(KEY);}catch(e){} speak(vs[0]); render(); };
+      list.appendChild(auto);
+      vs.forEach(function(v){
+        var b=document.createElement('button'), t=tag(v); b.type='button'; b.className='vopt'+(saved===v.voiceURI?' on':'');
+        b.innerHTML='🔊 <span></span><span class="tag '+t[1]+'">'+t[0]+'</span>'; b.children[0].textContent=v.name;
+        b.onclick=function(){ try{localStorage.setItem(KEY,v.voiceURI);}catch(e){} speak(v); render(); };
+        list.appendChild(b);
+      });
+    }
+    var m=document.getElementById('voiceModal');
+    document.getElementById('voiceBtn').onclick=function(){ m.hidden=false; render(); };
+    m.querySelector('.vclose').onclick=function(){ m.hidden=true; };
+    m.onclick=function(e){ if(e.target===m) m.hidden=true; };
+    try { speechSynthesis.addEventListener('voiceschanged', function(){ if(!m.hidden) render(); }); } catch(e){}
+  })();
+  </script>
 </body>
 </html>
