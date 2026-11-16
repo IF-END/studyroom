@@ -49,11 +49,16 @@
     .games {
       position: relative; z-index: 1;
       display: grid; gap: clamp(14px, 3vmin, 28px);
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       width: min(1100px, 100%);
     }
+    /* 5개 카드: 윗줄 3개, 아랫줄 2개 */
+    .games > .card { grid-column: span 2; }
+    .games > .card:nth-child(n+4) { grid-column: span 3; flex-direction: row; gap: 22px; }
+    .games > .card:nth-child(n+4) > div:nth-child(2) { text-align: left; }
     @media (orientation: portrait), (max-width: 700px) {
       .games { grid-template-columns: 1fr; width: min(560px, 100%); }
+      .games > .card, .games > .card:nth-child(n+4) { grid-column: auto; }
       .card { flex-direction: row !important; text-align: left !important; min-height: 0 !important; padding: 18px 22px !important; }
       .card .icon { font-size: 70px !important; margin: 0 !important; }
       .card .play { display: none !important; }
@@ -63,14 +68,14 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
       text-align: center; text-decoration: none; color: #fff;
       border-radius: 36px; border: 6px solid rgba(255, 255, 255, .85);
-      padding: 26px 18px 22px; min-height: clamp(280px, 52vmin, 420px);
+      padding: 16px 16px 16px; min-height: clamp(170px, 30vmin, 280px);
       box-shadow: 0 10px 0 rgba(0, 0, 0, .12), 0 18px 30px rgba(0, 0, 0, .12);
       transition: transform .12s ease, box-shadow .12s ease;
       position: relative; overflow: hidden;
     }
     .card:active { transform: translateY(6px) scale(.98); box-shadow: 0 4px 0 rgba(0, 0, 0, .12), 0 8px 14px rgba(0, 0, 0, .12); }
     .card::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 25% 15%, rgba(255,255,255,.35), transparent 45%); pointer-events: none; }
-    .card .icon { font-size: clamp(84px, 16vmin, 140px); line-height: 1; filter: drop-shadow(0 6px 6px rgba(0,0,0,.18)); animation: bob 3s ease-in-out infinite; }
+    .card .icon { font-size: clamp(60px, 10vmin, 110px); line-height: 1; filter: drop-shadow(0 6px 6px rgba(0,0,0,.18)); animation: bob 3s ease-in-out infinite; }
     .card:nth-child(2) .icon { animation-delay: -1s; }
     .card:nth-child(3) .icon { animation-delay: -2s; }
     @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -87,6 +92,12 @@
     .ocean .play { color: #1d4ed8; }
     .hangul { background: linear-gradient(160deg, #fbbf24, #f97316); }
     .hangul .play { color: #c2410c; }
+    .bugs { background: linear-gradient(160deg, #84cc16, #15803d); }
+    .bugs .play { color: #15803d; }
+    .cars { background: linear-gradient(160deg, #60a5fa, #6366f1); }
+    .cars .play { color: #4338ca; }
+    .card .play { white-space: nowrap; flex: none; padding: 6px 22px; font-size: clamp(18px, 2.6vmin, 24px); }
+    .card .name { font-size: clamp(24px, 4vmin, 38px); }
 
     .foot { position: relative; z-index: 1; margin-top: clamp(14px, 3vmin, 28px); font-size: 15px; color: #a08670; text-align: center; }
   </style>
@@ -119,6 +130,22 @@
       <div>
         <div class="name">한글 나라</div>
         <div class="desc">자음 · 모음 익히기<br>따라 쓰기 · 낱말 놀이</div>
+      </div>
+      <div class="play">놀러 가기 ▶</div>
+    </a>
+    <a class="card bugs" href="jungwon/">
+      <div class="icon">🐞</div>
+      <div>
+        <div class="name">정원이 채집통</div>
+        <div class="desc">곤충 채집 · 이름 맞히기<br>곤충 도감 · 박사 퀴즈</div>
+      </div>
+      <div class="play">놀러 가기 ▶</div>
+    </a>
+    <a class="card cars" href="jungwoo/">
+      <div class="icon">🚗</div>
+      <div>
+        <div class="name">정우네 주차장</div>
+        <div class="desc">숫자 · 한글 주차 놀이<br>자동차 세기 · 자동차 이름</div>
       </div>
       <div class="play">놀러 가기 ▶</div>
     </a>
